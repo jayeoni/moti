@@ -82,12 +82,29 @@ export default function OnboardingBody() {
         </View>
       )}
 
-      <TouchableOpacity
-        className="bg-primary rounded-2xl py-4 items-center mb-10"
-        onPress={handleNext}
-      >
-        <Text className="text-white font-bold text-base">Next →</Text>
-      </TouchableOpacity>
+      {tooAggressive ? (
+        <View className="gap-3 mb-10">
+          <TouchableOpacity
+            className="bg-white border-2 border-primary rounded-2xl py-4 items-center"
+            onPress={() => router.back()}
+          >
+            <Text className="text-primary font-bold text-base">← Edit My Goal</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="bg-[#FF6B6B] rounded-2xl py-4 items-center"
+            onPress={handleNext}
+          >
+            <Text className="text-white font-bold text-base">Continue Anyway →</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity
+          className="bg-primary rounded-2xl py-4 items-center mb-10"
+          onPress={handleNext}
+        >
+          <Text className="text-white font-bold text-base">Next →</Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 }

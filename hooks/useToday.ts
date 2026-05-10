@@ -195,7 +195,7 @@ export function useToday(): TodayState {
         checkin_completed: !!todayCheckin,
         flour_free: allergenFlagsToday.length === 0,
         updated_at: new Date().toISOString(),
-      });
+      }, { onConflict: 'user_id,date' });
     } catch (e: any) {
       setError(e.message ?? 'Failed to load today data');
     } finally {

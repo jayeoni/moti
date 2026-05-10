@@ -134,6 +134,7 @@ function MoodCheckin({ onDone }: { onDone: () => void }) {
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export default function TodayDashboard() {
+  const [showAllWorkouts, setShowAllWorkouts] = useState(false);
   const { dailyPlan, adherence, safety, checkin, loading, refresh } = useToday();
   const { goal, profile, plan } = useGoal();
   const { latestWeight, trend } = useWeightTrend(14);
@@ -229,11 +230,15 @@ export default function TodayDashboard() {
               <Text className="text-xs text-primary font-semibold">Log →</Text>
             </TouchableOpacity>
           </View>
-          {dailyPlan.must_do_workouts.slice(0, 4).map((ex, i) => (
+          {dailyPlan.must_do_workouts.slice(0, showAllWorkouts ? undefined : 4).map((ex, i) => (
             <Text key={i} className="text-sm text-[#7A6060] mb-1">• {ex}</Text>
           ))}
           {dailyPlan.must_do_workouts.length > 4 && (
-            <Text className="text-xs text-[#B09898] mt-1">+{dailyPlan.must_do_workouts.length - 4} more</Text>
+            <TouchableOpacity onPress={() => setShowAllWorkouts(!showAllWorkouts)} className="mt-1">
+              <Text className="text-xs text-primary font-semibold">
+                {showAllWorkouts ? '↑ Show less' : `+${dailyPlan.must_do_workouts.length - 4} more ↓`}
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
       )}

@@ -1,4 +1,5 @@
-import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useGoal } from '../../hooks/useGoal';
 import { useAdherence } from '../../hooks/useAdherence';
 import { Colors } from '../../constants/colors';
@@ -7,13 +8,26 @@ import { todayString } from '../../lib/utils/dateUtils';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { CompetitionEvent } from '../../types';
+import { AdherenceScore, CompetitionEvent } from '../../types';
+
+function isTaskDone(task: string, todayScore: AdherenceScore | null): boolean {
+  if (!todayScore) return false;
+  const t = task.toLowerCase();
+  if (t.includes('workout') || t.includes('train') || t.includes('exercise') || t.includes('session')) return todayScore.workout_logged;
+  if (t.includes('meal') || t.includes('eat') || t.includes('food') || t.includes('calorie') || t.includes('nutrition')) return todayScore.meal_logged;
+  if (t.includes('weight') || t.includes('scale') || t.includes('weigh')) return todayScore.weight_logged;
+  if (t.includes('check') || t.includes('mood') || t.includes('feeling') || t.includes('readiness')) return todayScore.checkin_completed;
+  if (t.includes('flour') || t.includes('gluten') || t.includes('flour-free')) return todayScore.flour_free;
+  return false;
+}
 
 export default function PlanScreen() {
+  const router = useRouter();
   const { goal, plan, loading: goalLoading } = useGoal();
   const { weekHistory } = useAdherence();
   const { user } = useAuth();
   const [competition, setCompetition] = useState<CompetitionEvent | null>(null);
+  const [todayScore, setTodayScore] = useState<AdherenceScore | null>(null);
   const weekDates = getWeekDates();
   const today = todayString();
 
@@ -27,6 +41,13 @@ export default function PlanScreen() {
       .limit(1)
       .maybeSingle()
       .then(({ data }) => setCompetition(data));
+    supabase
+      .from('adherence_scores')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('date', today)
+      .maybeSingle()
+      .then(({ data }) => setTodayScore(data as AdherenceScore | null));
   }, [user]);
 
   if (goalLoading) {
@@ -139,13 +160,50 @@ export default function PlanScreen() {
       {/* Non-negotiables */}
       {plan?.non_negotiables && (
         <View className="bg-white rounded-3xl p-4 mb-8 shadow-sm">
-          <Text className="text-sm font-bold text-[#3D2B2B] mb-3">Daily Must-Dos</Text>
-          {plan.non_negotiables.map((task, i) => (
-            <View key={i} className="flex-row items-center mb-2">
-              <View className="w-5 h-5 rounded-full border-2 border-primary mr-3" />
-              <Text className="text-sm text-[#3D2B2B]">{task}</Text>
-            </View>
-          ))}
+          <Text className="text-sm font-bold text-[#3D2B2B] mb-1">Daily Must-Dos</Text>
+          <Text className="text-xs text-[#B09898] mb-3">Circles fill automatically as you log today's activities.</Text>
+          {plan.non_negotiables.map((task, i) => {
+            const done = isTaskDone(task, todayScore);
+            return (
+              <View key={i} className="flex-row items-center mb-3">
+                <View
+                  style={{
+                    width: 22, height: 22, borderRadius: 11,
+                    borderWidth: 2,
+                    borderColor: done ? Colors.status.success : Colors.primary,
+                    backgroundColor: done ? Colors.status.success : 'transparent',
+                    alignItems: 'center', justifyContent: 'center',
+                    marginRight: 12,
+                  }}
+                >
+                  {done && <Text style={{ color: '#FFF', fontSize: 12, fontWeight: 'bold' }}>✓</Text>}
+                </View>
+                <Text className={`text-sm flex-1 ${done ? 'line-through text-[#B09898]' : 'text-[#3D2B2B]'}`}>{task}</Text>
+              </View>
+            );
+          })}
+          <View className="flex-row gap-2 mt-2 pt-3 border-t border-[#F4E4EA]">
+            {[
+              { label: '⚖️ Weight', route: '/log/weight' as const, done: todayScore?.weight_logged },
+              { label: '🍽️ Meal', route: '/log/meal' as const, done: todayScore?.meal_logged },
+              { label: '💪 Workout', route: '/log/workout' as const, done: todayScore?.workout_logged },
+            ].map(({ label, route, done }) => (
+              <TouchableOpacity
+                key={route}
+                onPress={() => router.push(route)}
+                style={{
+                  flex: 1, paddingVertical: 6, borderRadius: 10, alignItems: 'center',
+                  backgroundColor: done ? '#F0FFF8' : '#FFF0F4',
+                  borderWidth: 1,
+                  borderColor: done ? Colors.status.success : Colors.primary,
+                }}
+              >
+                <Text style={{ fontSize: 11, color: done ? Colors.status.success : Colors.primary, fontWeight: '600' }}>
+                  {done ? '✓ ' : ''}{label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       )}
     </ScrollView>

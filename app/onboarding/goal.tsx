@@ -12,6 +12,13 @@ const GOAL_OPTIONS: { type: GoalType; emoji: string; label: string; desc: string
   { type: 'maintenance', emoji: '🎯', label: 'Maintenance', desc: 'Hold current physique' },
 ];
 
+function formatDateInput(raw: string): string {
+  const digits = raw.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
+}
+
 export default function OnboardingGoal() {
   const { data, update } = useOnboarding();
   const router = useRouter();
@@ -89,8 +96,9 @@ export default function OnboardingGoal() {
         className="bg-white border border-[#F4A7B9] rounded-2xl px-4 py-3.5 text-[#3D2B2B] mb-6"
         placeholder="e.g. 2026-06-01"
         placeholderTextColor={Colors.text.muted}
+        keyboardType="number-pad"
         value={deadline}
-        onChangeText={setDeadline}
+        onChangeText={(t) => setDeadline(formatDateInput(t))}
       />
 
       {/* Competition toggle */}
@@ -115,8 +123,9 @@ export default function OnboardingGoal() {
             className="bg-white border border-[#F4A7B9] rounded-2xl px-4 py-3.5 text-[#3D2B2B]"
             placeholder="Event date (YYYY-MM-DD)"
             placeholderTextColor={Colors.text.muted}
+            keyboardType="number-pad"
             value={competitionDate}
-            onChangeText={setCompetitionDate}
+            onChangeText={(t) => setCompetitionDate(formatDateInput(t))}
           />
         </View>
       )}
