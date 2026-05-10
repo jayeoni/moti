@@ -63,6 +63,7 @@ export function useToday(): TodayState {
         allergyRes,
         existingPlanRes,
         adherenceRes,
+        recentWorkoutsRes,
       ] = await Promise.all([
         supabase.from('profiles').select('*').eq('user_id', user!.id).single(),
         supabase.from('goals').select('*').eq('user_id', user!.id).eq('is_active', true).limit(1).maybeSingle(),
@@ -74,6 +75,7 @@ export function useToday(): TodayState {
         supabase.from('allergy_rules').select('*').eq('user_id', user!.id),
         supabase.from('daily_plans').select('*').eq('user_id', user!.id).eq('date', today).maybeSingle(),
         supabase.from('adherence_scores').select('*').eq('user_id', user!.id).eq('date', today).maybeSingle(),
+        supabase.from('workout_sessions').select('*').eq('user_id', user!.id).gte('date', (() => { const d = new Date(); d.setDate(d.getDate() - 14); return d.toISOString().slice(0, 10); })()).order('date', { ascending: false }),
       ]);
 
       const profile = profileRes.data as Profile | null;
@@ -86,6 +88,7 @@ export function useToday(): TodayState {
       const allergyRules = (allergyRes.data ?? []) as AllergyRule[];
       const existingPlan = existingPlanRes.data as DailyPlan | null;
       const todayAdherence = adherenceRes.data as AdherenceScore | null;
+      const recentWorkouts = (recentWorkoutsRes.data ?? []) as WorkoutSession[];
 
       setCheckin(todayCheckin);
 
@@ -112,6 +115,7 @@ export function useToday(): TodayState {
           phase: plannerOut.phase,
           readiness_score: todayCheckin?.readiness ?? 6,
           available_time_minutes: 60,
+          recent_sessions: recentWorkouts,
         });
 
         const adherenceCheck = calculateAdherence({

@@ -224,12 +224,16 @@ export default function TodayDashboard() {
       {/* Workout card */}
       {dailyPlan?.must_do_workouts && dailyPlan.must_do_workouts.length > 0 && (
         <View className="bg-white rounded-3xl p-5 mb-4 shadow-sm">
-          <View className="flex-row items-center justify-between mb-3">
+          <View className="flex-row items-center justify-between mb-1">
             <Text className="font-bold text-[#3D2B2B]">💪 Today's Training</Text>
             <TouchableOpacity onPress={() => router.push('/log/workout')}>
               <Text className="text-xs text-primary font-semibold">Log →</Text>
             </TouchableOpacity>
           </View>
+          {(dailyPlan as any).diary_context && (
+            <Text className="text-xs text-[#B09898] mb-3">{(dailyPlan as any).diary_context}</Text>
+          )}
+          {!(dailyPlan as any).diary_context && <View className="mb-3" />}
           {dailyPlan.must_do_workouts.slice(0, showAllWorkouts ? undefined : 4).map((ex, i) => (
             <Text key={i} className="text-sm text-[#7A6060] mb-1">• {ex}</Text>
           ))}

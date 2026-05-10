@@ -5,6 +5,7 @@ const LOG_OPTIONS = [
   { route: '/log/weight', emoji: '⚖️', label: 'Log Weight', desc: 'Daily weigh-in', color: '#B5D5C5' },
   { route: '/log/meal', emoji: '🍽️', label: 'Log Meal', desc: 'Breakfast, lunch, dinner, snack', color: '#F4A7B9' },
   { route: '/log/workout', emoji: '💪', label: 'Log Workout', desc: 'Session, exercises, RPE', color: '#FFD6A5' },
+  { route: '/log/workout-history', emoji: '📖', label: 'Workout Diary', desc: 'History · edit · delete sessions', color: '#E8D5F5' },
   { route: '/report/weekly', emoji: '📊', label: 'Weekly Report', desc: 'AI insights & adherence', color: '#AEC6E8' },
 ];
 

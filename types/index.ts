@@ -234,6 +234,7 @@ export interface TrainingInput {
   phase: Phase;
   readiness_score: number; // 1–10
   available_time_minutes: number;
+  recent_sessions?: WorkoutSession[]; // last 14 days for diary-aware planning
 }
 
 export interface TrainingOutput {
@@ -242,6 +243,8 @@ export interface TrainingOutput {
   fallback_12min: string[];
   estimated_duration_minutes: number;
   rpe_target: number;
+  diary_context?: string; // e.g. "Last session was Full (RPE 8) on Mon"
+  avoided_muscle_groups?: string[]; // muscle groups rested from recent training
 }
 
 export interface DayLogs {

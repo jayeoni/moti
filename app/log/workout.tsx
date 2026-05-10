@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { EXERCISE_TEMPLATES } from '../../constants/exercises';
 import { todayString } from '../../lib/utils/dateUtils';
-import { ExerciseEntry, SessionType } from '../../types';
+import { ExerciseEntry, SessionType, WorkoutSession } from '../../types';
 import { Colors } from '../../constants/colors';
 
 const SESSION_TYPES: { type: SessionType; emoji: string; label: string; desc: string }[] = [
@@ -24,6 +24,10 @@ const RPE_LABELS: Record<number, string> = {
 export default function WorkoutLogScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const isEditing = !!id;
+
+  const [loadingSession, setLoadingSession] = useState(isEditing);
   const [sessionType, setSessionType] = useState<SessionType>('full');
   const [duration, setDuration] = useState('45');
   const [rpe, setRpe] = useState(7);
@@ -33,6 +37,26 @@ export default function WorkoutLogScreen() {
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (!id) return;
+    supabase
+      .from('workout_sessions')
+      .select('*')
+      .eq('id', id)
+      .single()
+      .then(({ data, error }) => {
+        if (error || !data) return;
+        const s = data as WorkoutSession;
+        setSessionType(s.session_type);
+        setDuration(String(s.duration_minutes ?? '45'));
+        setRpe(s.rpe ?? 7);
+        setQuality(s.quality_score ?? 7);
+        setNotes(s.notes ?? '');
+        setSelectedExercises(s.exercises.map((e) => e.exercise_name));
+        setLoadingSession(false);
+      });
+  }, [id]);
+
   const filteredExercises = searchQuery
     ? EXERCISE_TEMPLATES.filter((e) =>
         e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -41,17 +65,14 @@ export default function WorkoutLogScreen() {
     : [];
 
   function toggleExercise(name: string) {
-    if (selectedExercises.includes(name)) {
-      setSelectedExercises(selectedExercises.filter((e) => e !== name));
-    } else {
-      setSelectedExercises([...selectedExercises, name]);
-    }
+    setSelectedExercises((prev) =>
+      prev.includes(name) ? prev.filter((e) => e !== name) : [...prev, name]
+    );
   }
 
   async function handleSave() {
     if (!user) return;
     setSaving(true);
-    const today = todayString();
 
     const exercises: ExerciseEntry[] = selectedExercises.map((name) => ({
       exercise_id: name.toLowerCase().replace(/\s+/g, '_'),
@@ -59,40 +80,76 @@ export default function WorkoutLogScreen() {
       sets: [],
     }));
 
-    const { error } = await supabase.from('workout_sessions').insert({
-      user_id: user.id,
+    const payload = {
       session_type: sessionType,
-      date: today,
       duration_minutes: parseInt(duration) || null,
       rpe,
       quality_score: quality,
       exercises,
       notes: notes.trim() || null,
-      logged_at: new Date().toISOString(),
-    });
+    };
 
-    if (error) {
-      Alert.alert('Error', error.message);
+    if (isEditing) {
+      const { error } = await supabase.from('workout_sessions').update(payload).eq('id', id);
+      if (error) { Alert.alert('Error', error.message); setSaving(false); return; }
     } else {
-      // Update adherence
+      const today = todayString();
+      const { error } = await supabase.from('workout_sessions').insert({
+        ...payload,
+        user_id: user.id,
+        date: today,
+        logged_at: new Date().toISOString(),
+      });
+      if (error) { Alert.alert('Error', error.message); setSaving(false); return; }
       await supabase.from('adherence_scores').upsert({
         user_id: user.id,
         date: today,
-        score: 25,
         workout_logged: true,
         updated_at: new Date().toISOString(),
-      });
-      router.back();
+      }, { onConflict: 'user_id,date' });
     }
+
     setSaving(false);
+    router.back();
+  }
+
+  async function handleDelete() {
+    Alert.alert('Delete Workout', 'Remove this session from your diary?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive',
+        onPress: async () => {
+          await supabase.from('workout_sessions').delete().eq('id', id);
+          router.back();
+        },
+      },
+    ]);
+  }
+
+  if (loadingSession) {
+    return (
+      <View className="flex-1 bg-cream items-center justify-center">
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
   }
 
   return (
     <ScrollView className="flex-1 bg-cream" contentContainerStyle={{ padding: 24, paddingTop: 60 }}>
-      <TouchableOpacity onPress={() => router.back()} className="mb-6">
-        <Text className="text-primary font-semibold">← Back</Text>
-      </TouchableOpacity>
-      <Text className="text-2xl font-bold text-[#3D2B2B] mb-6">Log Workout</Text>
+      <View className="flex-row items-center justify-between mb-6">
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text className="text-primary font-semibold">← Back</Text>
+        </TouchableOpacity>
+        {isEditing && (
+          <TouchableOpacity onPress={handleDelete}>
+            <Text className="text-[#FF6B6B] font-semibold">🗑 Delete</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <Text className="text-2xl font-bold text-[#3D2B2B] mb-6">
+        {isEditing ? 'Edit Workout' : 'Log Workout'}
+      </Text>
 
       {/* Session type */}
       <Text className="text-sm font-medium text-[#3D2B2B] mb-3">Session type</Text>
@@ -214,13 +271,13 @@ export default function WorkoutLogScreen() {
 
       {/* Notes */}
       <View className="mb-6">
-        <Text className="text-sm font-medium text-[#3D2B2B] mb-1.5">Notes (optional)</Text>
+        <Text className="text-sm font-medium text-[#3D2B2B] mb-1.5">Notes / diary entry</Text>
         <TextInput
           className="bg-white border border-[#F4A7B9] rounded-2xl px-4 py-3 text-[#3D2B2B]"
-          placeholder="How did it go? Any PRs?"
+          placeholder="How did it go? Any PRs? Pain points? Energy level?"
           placeholderTextColor={Colors.text.muted}
           multiline
-          numberOfLines={3}
+          numberOfLines={4}
           value={notes}
           onChangeText={setNotes}
         />
@@ -232,7 +289,9 @@ export default function WorkoutLogScreen() {
         disabled={saving}
         style={{ opacity: saving ? 0.7 : 1 }}
       >
-        <Text className="text-white font-bold text-base">{saving ? 'Saving...' : 'Save Workout ✓'}</Text>
+        <Text className="text-white font-bold text-base">
+          {saving ? 'Saving...' : isEditing ? 'Save Changes ✓' : 'Save Workout ✓'}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
