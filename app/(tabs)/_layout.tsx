@@ -1,61 +1,36 @@
-import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
-import { Colors } from '../../constants/colors';
+import { Stack } from 'expo-router';
+import { useFonts } from 'expo-font';
+import { View, ActivityIndicator } from 'react-native';
+import { Newsreader_500Medium, Newsreader_500Medium_Italic } from '@expo-google-fonts/newsreader';
+import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
+import { IBMPlexMono_500Medium, IBMPlexMono_700Bold } from '@expo-google-fonts/ibm-plex-mono';
+import { Colors } from '../constants/colors';
+import '../global.css';
 
-function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
-  return (
-    <Text style={{ fontSize: focused ? 24 : 20, opacity: focused ? 1 : 0.6 }}>
-      {emoji}
-    </Text>
-  );
-}
+export default function RootLayout() {
+  const [loaded] = useFonts({
+    Newsreader_500Medium,
+    Newsreader_500Medium_Italic,
+    BebasNeue_400Regular,
+    IBMPlexMono_500Medium,
+    IBMPlexMono_700Bold,
+  });
 
-export default function TabLayout() {
+  if (!loaded) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.paper }}>
+        <ActivityIndicator color={Colors.ink} />
+      </View>
+    );
+  }
+
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopColor: '#F4E4EA',
-          borderTopWidth: 1,
-          paddingBottom: 8,
-          paddingTop: 4,
-          height: 64,
-        },
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.text.muted,
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '600', marginBottom: 2 },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Today',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="plan"
-        options={{
-          title: 'Plan',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📅" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="log"
-        options={{
-          title: 'Log',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="✏️" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} />,
-        }}
-      />
-    </Tabs>
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.paper } }}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="onboarding" />
+      <Stack.Screen name="log" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="report" options={{ presentation: 'modal' }} />
+    </Stack>
   );
 }
