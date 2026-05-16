@@ -1,13 +1,20 @@
 import '../global.css';
-import 'react-native-url-polyfill/auto';
 import { useEffect, useState } from 'react';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform } from 'react-native';
+import { useFonts } from 'expo-font';
+import { Newsreader_500Medium, Newsreader_500Medium_Italic } from '@expo-google-fonts/newsreader';
+import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
+import { IBMPlexMono_500Medium, IBMPlexMono_700Bold } from '@expo-google-fonts/ibm-plex-mono';
 import { AuthContext, useAuthState } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { Colors } from '../constants/colors';
+
+if (Platform.OS !== 'web') {
+  require('react-native-url-polyfill/auto');
+}
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuthState();
@@ -66,6 +73,21 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout() {
   const authState = useAuthState();
+  const [fontsLoaded] = useFonts({
+    Newsreader_500Medium,
+    Newsreader_500Medium_Italic,
+    BebasNeue_400Regular,
+    IBMPlexMono_500Medium,
+    IBMPlexMono_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.paper }}>
+        <ActivityIndicator color={Colors.ink} />
+      </View>
+    );
+  }
 
   return (
     <AuthContext.Provider value={authState}>
