@@ -1,247 +1,15 @@
-ㅍs && (
-        <LowWillpowerBanner tasks={dailyPlan.non_negotiables} />
-      )}
-
-      {/* Today's focus */}
-      {dailyPlan?.focus_statement && (
-        <View className="bg-[#FFF0F4] rounded-3xl p-4 mb-4">
-          <Text className="text-xs font-semibold text-primary mb-1">TODAY'S FOCUS</Text>
-          <Text className="text-sm text-[#3D2B2B] leading-5 font-medium">{dailyPlan.focus_statement}</Text>
-        </View>
-      )}
-
-      {/* Workout card */}
-      {dailyPlan?.must_do_workouts && dailyPlan.must_do_workouts.length > 0 && (
-        <View className="bg-white rounded-3xl p-5 mb-4 shadow-sm">
-          <View className="flex-row items-center justify-between mb-1">
-            <Text className="font-bold text-[#3D2B2B]">💪 Today's Training</Text>
-            <TouchableOpacity onPress={() => router.push('/log/workout')}>
-              <Text className="text-xs text-primary font-semibold">Log →</Text>
-            </TouchableOpacity>
-          </View>
-          {(dailyPlan as any).diary_context && (
-            <Text className="text-xs text-[#B09898] mb-3">{(dailyPlan as any).diary_context}</Text>
-          )}
-          {!(dailyPlan as any).diary_context && <View className="mb-3" />}
-          {dailyPlan.must_do_workouts.slice(0, showAllWorkouts ? undefined : 4).map((ex, i) => (
-            <Text key={i} className="text-sm text-[#7A6060] mb-1">• {ex}</Text>
-          ))}
-          {dailyPlan.must_do_workouts.length > 4 && (
-            <TouchableOpacity onPress={() => setShowAllWorkouts(!showAllWorkouts)} className="mt-1">
-              <Text className="text-xs text-primary font-semibold">
-                {showAllWorkouts ? '↑ Show less' : `+${dailyPlan.must_do_workouts.length - 4} more ↓`}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
-
-      {/* Meal suggestions */}
-      {dailyPlan?.meal_suggestions && dailyPlan.meal_suggestions.length > 0 && (
-        <View className="bg-white rounded-3xl p-5 mb-4 shadow-sm">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="font-bold text-[#3D2B2B]">🥗 Meal Ideas</Text>
-            {dailyPlan.flour_free_reminder && (
-              <View className="bg-[#E8F5F0] rounded-xl px-2.5 py-1">
-                <Text className="text-xs text-secondary font-semibold">🌾 Flour-free</Text>
-              </View>
-            )}
-          </View>
-          {dailyPlan.meal_suggestions.map((meal, i) => (
-            <View key={i} className="mb-2">
-              <Text className="text-xs text-[#B09898] uppercase font-semibold">{meal.meal_type}</Text>
-              <Text className="text-sm text-[#3D2B2B]">{meal.suggestion_name}</Text>
-              <Text className="text-xs text-[#7A6060]">~{meal.estimated_calories} kcal</Text>
-            </View>
-          ))}
-          <TouchableOpacity
-            className="mt-2 bg-[#F4E4EA] rounded-xl py-2 items-center"
-            onPress={() => router.push('/log/meal')}
-          >
-            <Text className="text-primary text-xs font-semibold">Log a meal →</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Weight trend */}
-      <View className="bg-white rounded-3xl p-5 mb-4 shadow-sm">
-        <View className="flex-row items-center justify-between mb-3">
-          <Text className="font-bold text-[#3D2B2B]">⚖️ Weight</Text>
-          <TouchableOpacity onPress={() => router.push('/log/weight')}>
-            <Text className="text-xs text-primary font-semibold">Log →</Text>
-          </TouchableOpacity>
-        </View>
-        {latestWeight ? (
-          <View className="flex-row items-baseline gap-2">
-            <Text className="text-3xl font-bold text-[#3D2B2B]">{latestWeight.toFixed(1)}</Text>
-            <Text className="text-sm text-[#7A6060]">kg</Text>
-            <Text className="text-sm">
-              {trend === 'down' ? '📉' : trend === 'up' ? '📈' : '➡️'}
-            </Text>
-          </View>
-        ) : (
-          <Text className="text-sm text-[#B09898]">No weight logged yet — tap to add</Text>
-        )}
-        {goal && (
-          <Text className="text-xs text-[#B09898] mt-1">
-            Target: {goal.target_weight_kg} kg · {daysUntil(goal.deadline_date)} days left
-          </Text>
-        )}
-      </View>
-
-      {/* Quick log buttons */}
-      <View className="flex-row gap-3 mb-8">
-        <TouchableOpacity
-          className="flex-1 bg-secondary rounded-2xl py-3 items-center"
-          onPress={() => router.push('/log/weight')}
-        >
-          <Text className="text-white font-semibold text-sm">⚖️ Weight</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="flex-1 bg-primary rounded-2xl py-3 items-center"
-          onPress={() => router.push('/log/meal')}
-        >
-          <Text className="text-white font-semibold text-sm">🍽️ Meal</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="flex-1 bg-accent rounded-2xl py-3 items-center"
-          onPress={() => router.push('/log/workout')}
-        >
-          <Text className="text-[#3D2B2B] font-semibold text-sm">💪 Workout</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
-}
-ㅍs && (
-        <LowWillpowerBanner tasks={dailyPlan.non_negotiables} />
-      )}
-
-      {/* Today's focus */}
-      {dailyPlan?.focus_statement && (
-        <View className="bg-[#FFF0F4] rounded-3xl p-4 mb-4">
-          <Text className="text-xs font-semibold text-primary mb-1">TODAY'S FOCUS</Text>
-          <Text className="text-sm text-[#3D2B2B] leading-5 font-medium">{dailyPlan.focus_statement}</Text>
-        </View>
-      )}
-
-      {/* Workout card */}
-      {dailyPlan?.must_do_workouts && dailyPlan.must_do_workouts.length > 0 && (
-        <View className="bg-white rounded-3xl p-5 mb-4 shadow-sm">
-          <View className="flex-row items-center justify-between mb-1">
-            <Text className="font-bold text-[#3D2B2B]">💪 Today's Training</Text>
-            <TouchableOpacity onPress={() => router.push('/log/workout')}>
-              <Text className="text-xs text-primary font-semibold">Log →</Text>
-            </TouchableOpacity>
-          </View>
-          {(dailyPlan as any).diary_context && (
-            <Text className="text-xs text-[#B09898] mb-3">{(dailyPlan as any).diary_context}</Text>
-          )}
-          {!(dailyPlan as any).diary_context && <View className="mb-3" />}
-          {dailyPlan.must_do_workouts.slice(0, showAllWorkouts ? undefined : 4).map((ex, i) => (
-            <Text key={i} className="text-sm text-[#7A6060] mb-1">• {ex}</Text>
-          ))}
-          {dailyPlan.must_do_workouts.length > 4 && (
-            <TouchableOpacity onPress={() => setShowAllWorkouts(!showAllWorkouts)} className="mt-1">
-              <Text className="text-xs text-primary font-semibold">
-                {showAllWorkouts ? '↑ Show less' : `+${dailyPlan.must_do_workouts.length - 4} more ↓`}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
-
-      {/* Meal suggestions */}
-      {dailyPlan?.meal_suggestions && dailyPlan.meal_suggestions.length > 0 && (
-        <View className="bg-white rounded-3xl p-5 mb-4 shadow-sm">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="font-bold text-[#3D2B2B]">🥗 Meal Ideas</Text>
-            {dailyPlan.flour_free_reminder && (
-              <View className="bg-[#E8F5F0] rounded-xl px-2.5 py-1">
-                <Text className="text-xs text-secondary font-semibold">🌾 Flour-free</Text>
-              </View>
-            )}
-          </View>
-          {dailyPlan.meal_suggestions.map((meal, i) => (
-            <View key={i} className="mb-2">
-              <Text className="text-xs text-[#B09898] uppercase font-semibold">{meal.meal_type}</Text>
-              <Text className="text-sm text-[#3D2B2B]">{meal.suggestion_name}</Text>
-              <Text className="text-xs text-[#7A6060]">~{meal.estimated_calories} kcal</Text>
-            </View>
-          ))}
-          <TouchableOpacity
-            className="mt-2 bg-[#F4E4EA] rounded-xl py-2 items-center"
-            onPress={() => router.push('/log/meal')}
-          >
-            <Text className="text-primary text-xs font-semibold">Log a meal →</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Weight trend */}
-      <View className="bg-white rounded-3xl p-5 mb-4 shadow-sm">
-        <View className="flex-row items-center justify-between mb-3">
-          <Text className="font-bold text-[#3D2B2B]">⚖️ Weight</Text>
-          <TouchableOpacity onPress={() => router.push('/log/weight')}>
-            <Text className="text-xs text-primary font-semibold">Log →</Text>
-          </TouchableOpacity>
-        </View>
-        {latestWeight ? (
-          <View className="flex-row items-baseline gap-2">
-            <Text className="text-3xl font-bold text-[#3D2B2B]">{latestWeight.toFixed(1)}</Text>
-            <Text className="text-sm text-[#7A6060]">kg</Text>
-            <Text className="text-sm">
-              {trend === 'down' ? '📉' : trend === 'up' ? '📈' : '➡️'}
-            </Text>
-          </View>
-        ) : (
-          <Text className="text-sm text-[#B09898]">No weight logged yet — tap to add</Text>
-        )}
-        {goal && (
-          <Text className="text-xs text-[#B09898] mt-1">
-            Target: {goal.target_weight_kg} kg · {daysUntil(goal.deadline_date)} days left
-          </Text>
-        )}
-      </View>
-
-      {/* Quick log buttons */}
-      <View className="flex-row gap-3 mb-8">
-        <TouchableOpacity
-          className="flex-1 bg-secondary rounded-2xl py-3 items-center"
-          onPress={() => router.push('/log/weight')}
-        >
-          <Text className="text-white font-semibold text-sm">⚖️ Weight</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="flex-1 bg-primary rounded-2xl py-3 items-center"
-          onPress={() => router.push('/log/meal')}
-        >
-          <Text className="text-white font-semibold text-sm">🍽️ Meal</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="flex-1 bg-accent rounded-2xl py-3 items-center"
-          onPress={() => router.push('/log/workout')}
-        >
-          <Text className="text-[#3D2B2B] font-semibold text-sm">💪 Workout</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
-}
 import { ScrollView, View, Text, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useToday } from '../../hooks/useToday';
 import { useGoal } from '../../hooks/useGoal';
 import { useWeightTrend } from '../../hooks/useWeightTrend';
 import { Colors } from '../../constants/colors';
-import { todayString } from '../../lib/utils/dateUtils';
 
 import { RedStamp } from '../../components/v2/RedStamp';
 import { Row } from '../../components/v2/Row';
 import { SectionHead } from '../../components/v2/SectionHead';
 import { FastBar } from '../../components/v2/FastBar';
 
-// ─── helpers ─────────────────────────────────────────────────
 function dateLine() {
   const d = new Date();
   const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -251,7 +19,6 @@ function dateLine() {
   return `${days[d.getDay()]} · ${d.getDate()} ${months[d.getMonth()]} · ${hh}:${mm}`;
 }
 
-// ─── Main ────────────────────────────────────────────────────
 export default function TodayDashboard() {
   const { dailyPlan, adherence, safety, checkin, loading, refresh } = useToday();
   const { goal, profile, plan } = useGoal();
@@ -268,13 +35,8 @@ export default function TodayDashboard() {
 
   const name = profile?.display_name?.split(' ')[0] ?? 'there';
   const phaseLabel = plan?.phase?.replace('_', ' ').toUpperCase() ?? 'CUT';
-  const dayNum = plan?.deadline_days != null && plan?.total_days != null
-    ? `${plan.total_days - plan.deadline_days}`
-    : '—';
-  const totalDays = plan?.total_days ?? '—';
+  const dayNum = plan?.deadline_days ?? '—';
 
-  // Three critical goals come from non_negotiables in low-willpower mode,
-  // otherwise pull from must_do_workouts + meal_suggestions head items.
   const goals: { label: string; tag: string; done: boolean }[] =
     dailyPlan?.non_negotiables?.slice(0, 3).map((label, i) => ({
       label,
@@ -294,7 +56,7 @@ export default function TodayDashboard() {
       contentContainerStyle={{ paddingBottom: 40 }}
       refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={Colors.ink} />}
     >
-      {/* ─── Masthead ─────────────────────────────── */}
+      {/* Masthead */}
       <View
         style={{
           paddingTop: 56,
@@ -325,7 +87,7 @@ export default function TodayDashboard() {
         </View>
       </View>
 
-      {/* ─── Date + headline ──────────────────────── */}
+      {/* Date + headline */}
       <View style={{ paddingHorizontal: 20, paddingTop: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <Text style={{ fontFamily: Colors.font.mono, fontSize: 10, letterSpacing: 2, color: Colors.ink }}>
@@ -347,7 +109,7 @@ export default function TodayDashboard() {
         </Text>
       </View>
 
-      {/* ─── Safety warnings (kept from original) ─── */}
+      {/* Safety warnings */}
       {safety?.warnings?.map((w, i) => (
         <View key={i} style={{ marginHorizontal: 20, marginTop: 14, padding: 12, borderWidth: 1.5, borderColor: Colors.red }}>
           <Text style={{ fontFamily: Colors.font.mono, fontSize: 9, letterSpacing: 2, color: Colors.red }}>
@@ -359,7 +121,7 @@ export default function TodayDashboard() {
         </View>
       ))}
 
-      {/* ─── Mood checkin (if missing) ─────────────── */}
+      {/* Mood checkin prompt */}
       {!checkin && (
         <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
           <SectionHead title="Check in" meta="not yet today" />
@@ -375,7 +137,7 @@ export default function TodayDashboard() {
         </View>
       )}
 
-      {/* ─── Condition table ──────────────────────── */}
+      {/* Condition table */}
       {checkin && (
         <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
           <SectionHead title="Condition" meta={`CHECKIN ✓ ${formatTime(checkin.created_at)}`} />
@@ -396,7 +158,7 @@ export default function TodayDashboard() {
         </View>
       )}
 
-      {/* ─── Today: The Three ─────────────────────── */}
+      {/* Today: The Three */}
       <View style={{ paddingHorizontal: 20, marginTop: 22 }}>
         <SectionHead title="Today · Three Things" meta={inRecovery ? 'LOW-W MODE' : 'KEEP IT SHORT'} />
         {goals.map((g, i) => (
@@ -448,7 +210,7 @@ export default function TodayDashboard() {
         ))}
       </View>
 
-      {/* ─── Eating window ────────────────────────── */}
+      {/* Eating window */}
       {(dailyPlan as any)?.fasting_window && (
         <View style={{ paddingHorizontal: 20, marginTop: 22 }}>
           <FastBar
@@ -459,7 +221,7 @@ export default function TodayDashboard() {
         </View>
       )}
 
-      {/* ─── Coach line ──────────────────────────── */}
+      {/* Coach line */}
       {dailyPlan?.focus_statement && (
         <View style={{ paddingHorizontal: 20, marginTop: 22 }}>
           <Text style={{ fontFamily: Colors.font.mono, fontSize: 9, letterSpacing: 2, color: Colors.muted }}>
@@ -471,7 +233,7 @@ export default function TodayDashboard() {
         </View>
       )}
 
-      {/* ─── Quick log row ────────────────────────── */}
+      {/* Quick log row */}
       <View style={{ paddingHorizontal: 20, marginTop: 28, borderTopWidth: 1.5, borderTopColor: Colors.ink, paddingTop: 12 }}>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <LogButton label="MEAL"    onPress={() => router.push('/log/meal')} />

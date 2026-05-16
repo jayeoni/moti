@@ -91,6 +91,8 @@ export interface DailyCheckin {
   sleep_quality: 1 | 2 | 3 | 4 | 5;
   hunger_level: 1 | 2 | 3 | 4 | 5;
   motivation_state: MotivationState;
+  stress_level?: number; // 1–10, optional
+  bloating?: string;     // 'none' | 'mild' | 'moderate' | 'severe', optional
   created_at: string;
 }
 
